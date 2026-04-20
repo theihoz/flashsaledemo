@@ -1,0 +1,28 @@
+name: Cucumber Tag Pipelines
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  stateless:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Run stateless cucumber suite
+        run: mvn -B test -Pstateless-tests
+
+  restart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Run restart cucumber suite
+        run: mvn -B test -Prestart-tests

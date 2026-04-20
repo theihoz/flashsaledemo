@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flash Sale Mỹ Phẩm - Xinh Tươi Đón Lễ</title>
+  <link rel="stylesheet" href="./src/styles/main.css">
+  <link rel="stylesheet" href="./src/styles/customer.css">
+</head>
+<body>
+  <nav class="navbar glass">
+    <div class="container nav-content">
+      <div class="logo">💄 BeautySale</div>
+      <div class="nav-links">
+        <a href="/admin.html" class="nav-link">Quản trị</a>
+        <div class="cart">
+          🛒 Giỏ hàng <span id="cart-count" class="badge">0</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero glass">
+      <div class="hero-content">
+        <h1>SIÊU SALE LÀM ĐẸP</h1>
+        <p>Săn deal mỹ phẩm đỉnh cao với giá siêu hời. Số lượng có hạn!</p>
+        
+        <div id="countdown-container" class="countdown-wrapper" style="display: none;">
+          <h3>🕒 KẾT THÚC SAU</h3>
+          <div class="countdown-timer">
+            <div class="time-box">
+              <span id="hours">00</span><span class="label">Giờ</span>
+            </div>
+            <div class="time-box">
+              <span id="minutes">00</span><span class="label">Phút</span>
+            </div>
+            <div class="time-box">
+              <span id="seconds">00</span><span class="label">Giây</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="products-section">
+      <h2 class="section-title">⚡ Đang Bán Chạy</h2>
+      <div id="product-grid" class="product-grid">
+        <!-- Products injected by JS -->
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="./src/js/customer.js"></script>
+</body>
+</html>

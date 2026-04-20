@@ -1,0 +1,36 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Node.js
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+
+# IDE / AI Tools
+.gemini/
+.agent/
+.codex/
+.cursor/
+.m2/
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local

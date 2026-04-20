@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Quản trị Flash Sale</title>
+  <link rel="stylesheet" href="./src/styles/main.css">
+  <link rel="stylesheet" href="./src/styles/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar glass">
+      <div class="logo">💄 Beauty Admin</div>
+      <ul class="nav-menu">
+        <li class="active"><a href="#dashboard">📊 Dashboard (US4)</a></li>
+        <li><a href="#campaign">⚙️ Tạo Chiến Dịch (US3)</a></li>
+        <li><a href="#combo">🎁 Quản lý Combo (US5)</a></li>
+        <li><a href="/index.html">🛒 Về Cửa Hàng</a></li>
+      </ul>
+    </aside>
+
+    <main class="admin-content">
+      <section id="dashboard" class="admin-section active">
+        <h2>Báo Cáo Hiệu Quả Flash Sale</h2>
+        <div class="stats-grid">
+          <div class="stat-card glass">
+            <h3>Doanh Thu</h3>
+            <div id="revenue-val" class="stat-value">0 đ</div>
+          </div>
+          <div class="stat-card glass">
+            <h3>Tỷ Lệ Bán Ra</h3>
+            <div class="stat-value">
+               <span id="sold-val">0</span>%
+            </div>
+            <div class="progress-bar-bg">
+                <div id="sold-bar" class="progress-bar-fill" style="width: 0%"></div>
+            </div>
+            <p id="inventory-stats" class="stat-subtitle">Đã bán 0/0 suất</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="campaign" class="admin-section">
+        <div class="glass form-container">
+          <h2>Thiết Lập Chiến Dịch</h2>
+          <form id="campaign-form">
+             <div class="form-group">
+                <label>Thời gian bắt đầu</label>
+                <input type="time" id="start-time" required>
+             </div>
+             <div class="form-group">
+                <label>Thời gian kết thúc</label>
+                <input type="time" id="end-time" required>
+             </div>
+             <div class="form-group">
+                <label>Mức giảm giá (%)</label>
+                <input type="number" id="discount-pct" required min="1" max="100">
+             </div>
+             <button type="submit" class="btn btn-primary">Lưu Chiến Dịch</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="combo" class="admin-section">
+        <div class="glass form-container">
+          <h2>Quản Lý Combo</h2>
+          <form id="combo-form">
+              <div class="form-group">
+                 <label>Tên Combo</label>
+                 <input type="text" id="combo-name" required>
+              </div>
+              <div class="form-group">
+                 <label>Mức giảm (%)</label>
+                 <input type="number" id="combo-discount" required>
+              </div>
+              <div class="form-group">
+                 <label>Chọn Sản Phẩm</label>
+                 <select id="combo-products" multiple required style="height: 120px;">
+                    <!-- Filled by JS -->
+                 </select>
+                 <small style="color:var(--text-secondary)">Giữ Ctrl để chọn nhiều</small>
+              </div>
+              <button type="submit" class="btn btn-primary">Tạo Combo</button>
+          </form>
+          
+          <h3 style="margin-top: 30px; margin-bottom: 15px;">Danh sách Combo</h3>
+           <div id="combo-list" class="combo-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="./src/js/admin.js"></script>
+</body>
+</html>
