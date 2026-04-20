@@ -10,7 +10,11 @@ Tính năng **Flash Sale** tạo ra sự khan hiếm chiến lược để thúc
 
 ### 🟢 US1: Hiển thị trạng thái Flash Sale trên sản phẩm
 
-> **Business Rules:** Là khách hàng, tôi muốn thấy giá ưu đãi, số tiền tiết kiệm được và đồng hồ đếm ngược trên trang sản phẩm để ra quyết định mua hàng nhanh hơn.
+> **User Story:** Là khách hàng, tôi muốn thấy giá ưu đãi, số tiền tiết kiệm được và đồng hồ đếm ngược trên trang sản phẩm để ra quyết định mua hàng nhanh hơn.
+>
+> **Business Rules:**
+> *   Hệ thống chỉ hiển thị các thông tin Flash Sale khi chiến dịch đang ở trạng thái hiệu lực (`Active`).
+> *   Dữ liệu đếm ngược phải được đồng bộ với thời gian thực của máy chủ (Server Time).
 
 #### ✅ Acceptance Criteria:
 *   **Scenario 1.1 (Happy Path): Xem sản phẩm trong giờ Flash Sale**
@@ -32,7 +36,11 @@ Tính năng **Flash Sale** tạo ra sự khan hiếm chiến lược để thúc
 
 ### 🟢 US2: Xử lý tồn kho và thanh toán
 
-> **Business Rules:** Là khách hàng, tôi muốn hệ thống chốt đúng giá ưu đãi nếu tôi mua trong giới hạn số lượng cho phép, để đảm bảo tính công bằng.
+> **User Story:** Là khách hàng, tôi muốn hệ thống chốt đúng giá ưu đãi nếu tôi mua trong giới hạn số lượng cho phép, để đảm bảo tính công bằng.
+>
+> **Business Rules:**
+> *   Việc kiểm tra và trừ tồn kho Flash Sale phải được thực hiện đồng bộ (Synchronized) để tránh tình trạng bán quá mức (Overselling).
+> *   Nếu tồn kho Flash Sale về 0, hệ thống phải tự động chuyển hướng người dùng về giá gốc của sản phẩm.
 
 #### ✅ Acceptance Criteria:
 *   **Scenario 2.1 (Happy Path): Thanh toán hợp lệ**
@@ -54,7 +62,11 @@ Tính năng **Flash Sale** tạo ra sự khan hiếm chiến lược để thúc
 
 ### 🟢 US3: Thiết lập chiến dịch (Dành cho Quản lý)
 
-> **Business Rules:** Là Quản lý cửa hàng, tôi muốn lên lịch Ngày & Giờ và cấu hình mức giảm giá cho chiến dịch để hệ thống tự động chạy.
+> **User Story:** Là Quản lý cửa hàng, tôi muốn lên lịch Ngày & Giờ và cấu hình mức giảm giá cho chiến dịch để hệ thống tự động chạy.
+>
+> **Business Rules:**
+> *   Mức giảm giá tối đa cho phép là 50% (Constraint theo điều khoản kinh doanh).
+> *   Thời gian bắt đầu (Start Time) phải luôn nhỏ hơn thời gian kết thúc (End Time).
 
 #### ✅ Acceptance Criteria:
 *   **Scenario 3.1 (Happy Path): Tạo chiến dịch hợp lệ**
@@ -76,7 +88,11 @@ Tính năng **Flash Sale** tạo ra sự khan hiếm chiến lược để thúc
 
 ### 🟢 US4: Báo cáo hiệu quả thời gian thực (Dành cho Quản lý)
 
-> **Business Rules:** Là Quản lý cửa hàng, tôi muốn xem doanh thu và tỷ lệ bán ra theo thời gian thực để quyết định bổ sung hàng hoặc thay đổi chiến lược marketing.
+> **User Story:** Là Quản lý cửa hàng, tôi muốn xem doanh thu và tỷ lệ bán ra theo thời gian thực để quyết định bổ sung hàng hoặc thay đổi chiến lược marketing.
+>
+> **Business Rules:**
+> *   Dữ liệu doanh thu và tỷ lệ bán ra phải được cập nhật ngay lập tức sau mỗi giao dịch thanh toán thành công.
+> *   Hệ thống phải chặn việc tính toán tỷ lệ nếu tổng số lượng hảng ban đầu chưa được cấu hình (phòng lỗi chia cho 0).
 
 #### ✅ Acceptance Criteria:
 *   **Scenario 4.1 (Happy Path): Xem báo cáo khi có đơn hàng**
@@ -98,7 +114,12 @@ Tính năng **Flash Sale** tạo ra sự khan hiếm chiến lược để thúc
 
 ### 🟢 US5: Quản lý Sản phẩm và Combo Sale
 
-> **Business Rules:** Là Quản lý cửa hàng, tôi muốn gộp nhiều sản phẩm thành một Combo Flash Sale để đẩy hàng tồn kho nhanh hơn.
+> **User Story:** Là Quản lý cửa hàng, tôi muốn gộp nhiều sản phẩm thành một Combo Flash Sale để đẩy hàng tồn kho nhanh hơn.
+>
+> **Business Rules:**
+> *   Mỗi gói Combo phải chứa ít nhất một mã sản phẩm hợp lệ.
+> *   Không cho phép tạo Combo nếu một trong các sản phẩm thành phần đã hết hàng trong kho Flash Sale.
+> *   Số lượng Combo khả dụng được tính theo sản phẩm có tồn kho thấp nhất trong gói.
 
 #### ✅ Acceptance Criteria:
 *   **Scenario 5.1 (Happy Path): Tạo Combo hợp lệ**
