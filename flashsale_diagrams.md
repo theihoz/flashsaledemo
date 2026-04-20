@@ -39,12 +39,15 @@ sequenceDiagram
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
-*   **Dữ liệu vào (Input):** `campaign` (đối tượng chiến dịch), `productName` (tên sản phẩm cần xem).
-*   **Tiến trình xử lý (Processing):**
-    *   `CustomerBoundary` đóng vai trò chuyển tiếp yêu cầu, không giữ logic tính toán.
-    *   `ProductCatalog` đóng vai trò "trung tâm tính toán": nhận `discountPercent` từ Entity để áp dụng công thức: `Price * (1 - discount/100)`.
-    *   `FlashSaleCampaign` chỉ chịu trách nhiệm về trạng thái thời gian (Trạng thái logic: True/False).
-*   **Kết quả trả về (Result):** Một chuỗi định dạng (String) chứa giá tiền cuối cùng hoặc thông tin lỗi để hiển thị trực tiếp lên UI.
+1. **Dữ liệu đầu vào (Input Artifacts):** Nhận `Campaign` (Đối tượng chiến dịch), thời gian hệ thống (`currentTime`) và tên sản phẩm.
+2. **Tiến trình xử lý (Technical Processing):**
+    * `CustomerBoundary` tiếp nhận yêu cầu từ người dùng, thực hiện ủy thác (delegation) việc xử lý dữ liệu cho `ProductCatalog`.
+    * `ProductCatalog` (Control) đóng vai trò trung gian, phối hợp kiểm tra tính hiệu lực qua thực thể `FlashSaleCampaign`.
+    * `FlashSaleCampaign` (Entity) thực hiện so khớp thời gian (Temporal matching) để xác định xem `currentTime` có nằm trong cửa sổ Sale hay không.
+3. **Đặc tính kỹ thuật (Technical Specs):**
+    * **Decoupling**: Logic hiển thị tách biệt hoàn toàn khỏi logic nghiệp vụ, đảm bảo dễ dàng thay đổi giao diện mà không ảnh hưởng tới cách tính thời gian.
+    * **Temporal Validation**: Hệ thống sử dụng thời gian của máy chủ (Server-side) để ngăn chặn việc gian lận thời gian từ phía Client.
+4. **Kết quả trả về (Output):** Trả về giá đã được tính toán (Calculated Price) kèm theo cờ trạng thái (`isActive`) để lớp Boundary quyết định việc render đồng hồ đếm ngược.
 
 ### 3. Sơ đồ Trạng Thái (State Diagram)
 > **Giải thích:** Vòng đời của một chiến dịch đi từ lúc ngủ đông đến lúc tự đào thải.
@@ -138,12 +141,15 @@ sequenceDiagram
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
-*   **Dữ liệu vào (Input):** `inventory` (đối tượng thực thể quản lý kho), `quantity` (số lượng khách đặt mua - phải > 0).
-*   **Tiến trình xử lý (Processing):**
-    *   `OrderCheckout` gọi phương thức `holdInventory(quantity)`.
-    *   **Tại Entity:** Dữ liệu `availableQuantity` được bảo vệ bởi từ khóa `synchronized`. 
-    *   **Logic:** Hệ thống kiểm tra điều kiện `if (availableQuantity >= quantity)`. Nếu thỏa mãn, thực hiện phép trừ trực tiếp vào vùng nhớ RAM (Database tạm thời).
-*   **Đầu ra (Output):** Trả về trạng thái `true` để Control tiếp tục luồng tạo hóa đơn, hoặc ném lỗi ngay lập tức để ngắt giao dịch nếu kho không đủ.
+1. **Dữ liệu đầu vào (Input Artifacts):** `requestedQuantity` (Số lượng sản phẩm khách muốn mua) và Thực thể kho `FlashSaleInventory`.
+2. **Tiến trình xử lý (Technical Processing):**
+    * `OrderCheckout` (Control) triệu hồi phương thức `holdInventory` tại lớp Entity.
+    * Thực thể kho kiểm tra xác thực số dư khả dụng (`availableQuantity >= quantity`). 
+    * Nếu thỏa mãn, thực hiện biến đổi trạng thái (State mutation) bằng cách trừ trực tiếp vào bộ nhớ.
+3. **Đặc tính kỹ thuật (Technical Specs):**
+    * **Thread-safety**: Sử dụng cơ chế khóa đồng bộ (`synchronized`) đảm bảo tính nguyên tử (Atomicity), ngăn chặn tình trạng thất thoát kho hoặc bán quá mức (Overselling) khi có hàng nghìn người cùng mua một lúc.
+    * **Fail-fast Logic**: Nếu kho không đủ, hệ thống ném `IllegalStateException` ngay lập tức để ngắt tiến trình (Interrupt process), đảm bảo không tạo đơn hàng khống.
+4. **Đầu ra (Output):** Trả về trạng thái giao dịch thành công (Boolean) và cập nhật số dư kho thực tế trên RAM.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text
@@ -217,11 +223,14 @@ sequenceDiagram
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
-*   **Dữ liệu vào (Input):** `startTime`, `endTime` (LocalDateTime), `discountPercent` (double).
-*   **Tiến trình xử lý (Processing):**
-    *   Dữ liệu thô từ Giao diện được `AdminBoundary` đóng gói và gửi tới `CampaignManager`.
-    *   **Chốt chặn cuối (Entity Constructor):** Đây là nơi dữ liệu bị kiểm soát gắt gao nhất. Nếu logic `end.isBefore(start)` hoặc `discount > 50.0` là đúng, tiến trình khởi tạo object sẽ bị hủy bỏ ngay lập tức (Fail-fast).
-*   **Kết quả (Result):** Một thực thể `FlashSaleCampaign` sạch được nạp vào RAM, sẵn sàng để đồng bộ với `initial_data.json` nếu cần, đảm bảo hệ thống không bao giờ vận hành với thông số sai.
+1. **Dữ liệu đầu vào (Input Artifacts):** `startTime`, `endTime` (Dạng LocalDateTime) và mức giảm giá `discountPercent`.
+2. **Tiến trình xử lý (Technical Processing):**
+    * `CampaignManager` (Control) đóng vai trò điều phối, khởi tạo thực thể `FlashSaleCampaign` mới.
+    * Toàn bộ quy tắc kiểm soát biên lợi nhuận được thực thi ngay tại tầng khởi tạo (Constructor validation).
+3. **Đặc tính kỹ thuật (Technical Specs):**
+    * **Constructor Guard**: Ngăn chặn việc tạo ra các thực thể "không hợp lệ" ngay từ giai đoạn cấp phát vùng nhớ (ví dụ: Sale > 50% hoặc thời gian bắt đầu sau thời gian kết thúc).
+    * **Business Rule Enforcement**: Chuyển đổi quy định hành chính sang quy định cứng trong mã nguồn (Hard-coded constraints), giảm thiểu sai sót do con người.
+4. **Kết quả (Result):** Một thực thể chiến dịch hợp lệ được nạp vào danh sách quản lý, sẵn sàng hoạt động ngay khi tới giờ.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text
@@ -296,12 +305,14 @@ sequenceDiagram
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
-*   **Dữ liệu vào (Input):** `analytics` (Thực thể chứa các biến tích lũy `totalRevenue` và `soldQuantity`).
-*   **Tiến trình xử lý (Processing):**
-    *   `DashboardController` thu thập các giá trị nguyên bản từ Entity.
-    *   **Xử lý số liệu:** Thực hiện phép chia tỷ lệ và bọc trong cơ chế kiểm soát lỗi `initialTotal == 0`.
-    *   Dữ liệu được đóng gói vào một mảng `double[]` để tối ưu tốc độ truyền tải giữa các Layer.
-*   **Kết quả (Result):** Trả về mảng dữ liệu định dạng chuẩn, giúp Boundary hiển thị doanh thu (ví dụ: 50,000,000) và tỷ lệ (ví dụ: 80%) mà không cần truy vấn lại Database.
+1. **Dữ liệu đầu vào (Input Artifacts):** Thực thể `SaleAnalytics` chứa tổng doanh thu lũy kế và số lượng hàng đã tiêu thụ.
+2. **Tiến trình xử lý (Technical Processing):**
+    * `DashboardController` (Control) truy xuất các trạng thái số liệu hiện hành từ Entity.
+    * Thực hiện các phép toán tổng hợp (Aggregation) và chuyển đổi dữ liệu sang định dạng báo cáo.
+3. **Đặc tính kỹ thuật (Technical Specs):**
+    * **Division-by-Zero Protection**: Kiểm soát lỗi số học tại tầng Entity; nếu chưa cấu hình số lượng tổng ban đầu, hệ thống sẽ trả về 0% và cảnh báo thay vì gây sập ứng dụng.
+    * **Real-time Observability**: Dữ liệu được tính toán tức thì từ dữ liệu thực trong RAM, đảm bảo Dashboard luôn phản ánh chính xác tình hình kinh doanh từng giây.
+4. **Kết quả (Result):** Một cấu trúc dữ liệu báo cáo (Array/Object) chứa KPI Doanh thu và Tỷ lệ sẵn sàng để đẩy lên lớp giao diện.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text
@@ -375,12 +386,14 @@ sequenceDiagram
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
-*   **Dữ liệu vào (Input):** `List<FlashSaleInventory>` (Danh sách thực thể các sản phẩm thành phần), mức giảm giá `discount`.
-*   **Tiến trình xử lý (Processing):**
-    *   `ComboManager` đóng vai trò là "người thu gom", kết nối các sản phẩm lẻ lại với nhau.
-    *   **Luồng kiểm tra (Deep Validation):** Entity thực hiện vòng lặp `for-each` để quét toàn bộ danh sách. 
-    *   **Business Rule:** Nếu bất kỳ sản phẩm nào có `availableQuantity <= 0`, toàn bộ logic khởi tạo Combo sẽ bị hủy bỏ (Transactional consistency).
-*   **Kết quả (Result):** Một thực thể `FlashSaleCombo` đa thành phần được đăng ký thành công, hoặc thông báo lỗi chỉ rõ sản phẩm nào đang cản trở việc tạo Combo.
+1. **Dữ liệu đầu vào (Input Artifacts):** Tập hợp các thực thể kho (`List<FlashSaleInventory>`) và thông tin cấu hình giá/giảm giá.
+2. **Tiến trình xử lý (Technical Processing):**
+    * `ComboManager` điều phối việc gộp nhóm các thực thể đơn lẻ thành một thực thể phức hợp `FlashSaleCombo`.
+    * Thực hiện vòng lặp kiểm tra tính khả dụng của toàn bộ danh sách thành phần trước khi cấp phép tạo Combo.
+3. **Đặc tính kỹ thuật (Technical Specs):**
+    * **Composite Logic**: Số lượng Combo khả dụng tuân theo nguyên tắc "Mắt xích yếu nhất" - được tính toán dựa trên mức tồn thấp nhất trong danh sách linh kiện.
+    * **All-or-Nothing Validation**: Chỉ cần một sản phẩm thành phần hết hàng, toàn bộ quy trình tạo Combo sẽ bị hủy bỏ để đảm bảo tính nhất quán của gói hàng.
+4. **Kết quả (Result):** Một thực thể Combo đa thành phần được đăng ký thành công vào danh sách quản lý.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text
