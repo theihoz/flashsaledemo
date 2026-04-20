@@ -222,5 +222,6 @@ Mở **Terminal (Command Prompt)** lên, đi đến thư mục dự án và gõ 
 ```bash
 mvn clean test
 ```
+npm run preview
 
 Hệ thống sẽ ngay lập tức tự động quét, giả lập khách hàng chạy qua 5 User Stories và trả về kết quả màu xanh (`BUILD SUCCESS`) nếu mọi tính năng vẫn đang hoạt động hoàn hảo!

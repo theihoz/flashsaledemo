@@ -12,7 +12,7 @@
    Là nơi khách xem, nhấn                Là nhân viên chạy bàn                Là nhà bếp nấu công thức
 ```
 
-### 2. Sơ đồ Kịch Bản (Sequence Diagram)
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
 > **Kỹ thuật:** Luồng xử lý lấy thông tin giá từ Layer Boundary qua Control tới Entity.
 
 ```mermaid
@@ -114,7 +114,7 @@ stateDiagram-v2
   ╚════════════════════╝ <== T/C, Lỗi= └────────────────────┘ <== Trừ kho ==⟪──────────────────────⟫
 ```
 
-### 2. Sơ đồ Kịch Bản (Sequence Diagram)
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
 > **Kỹ thuật:** Luồng xử lý đặt hàng và trừ tồn kho an toàn (Thread-safe logic).
 
 ```mermaid
@@ -194,7 +194,7 @@ sequenceDiagram
   ╚════════════════════╝ <== T/C, Lỗi= └────────────────────┘ <== Báo lỗi ==⟪──────────────────────⟫
 ```
 
-### 2. Sơ đồ Kịch Bản (Sequence Diagram)
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
 > **Kỹ thuật:** Luồng nghiệp vụ cấu hình chiến dịch mới kèm theo các ràng buộc bảo vệ biên lợi nhuận.
 
 ```mermaid
@@ -274,7 +274,7 @@ sequenceDiagram
   ╚════════════════════╝ <== Đồ Thị == └────────────────────┘ <== Kết quả ==⟪──────────────────────⟫
 ```
 
-### 2. Sơ đồ Kịch Bản (Sequence Diagram)
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
 > **Kỹ thuật:** Luồng truy vấn báo cáo thời gian thực từ Entity Sales.
 
 ```mermaid
@@ -353,7 +353,7 @@ sequenceDiagram
   ╚════════════════════╝ <== Lưu OK == └────────────────────┘ <== Xét Duyệt=⟪──────────────────────⟫
 ```
 
-### 2. Sơ đồ Kịch Bản (Sequence Diagram)
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
 > **Kỹ thuật:** Luồng nghiệp vụ đóng gói Combo đa sản phẩm kèm bước kiểm tra tồn kho thành phần (validateStock).
 
 ```mermaid
