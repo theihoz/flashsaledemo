@@ -2,11 +2,26 @@
 
 ## 1. Giới thiệu (Mục tiêu Nghiệp vụ)
 Tính năng Flash Sale tạo ra sự khan hiếm chiến lược để thúc đẩy chốt đơn nhanh. Trong bối cảnh thương mại điện tử 2026, tính năng này không chỉ phục vụ khách hàng trực tiếp mà còn phải tối ưu hóa dữ liệu (cấu trúc rõ ràng) để các Trợ lý AI (AI Shopping Agents) có thể đọc, so sánh giá và tự động chốt đơn thay cho người dùng.
-Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slicing), đảm bảo mỗi User Story (US) là một tính năng hoàn chỉnh, độc lập (chuẩn INVEST).
+Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slicing), tuân thủ nghiêm ngặt mô hình kiến trúc **BCE (Boundary - Control - Entity)** và sử dụng **JSON Database** để quản lý dữ liệu khởi tạo.
 
 ---
 
-## 2. Chi tiết Use Cases & User Stories
+## 2. Kiến trúc & Cơ sở dữ liệu
+
+### Mô hình BCE (Boundary - Control - Entity)
+Để đảm bảo tính linh hoạt và dễ kiểm thử, dự án được phân lớp rõ ràng:
+*   **Boundary (Lớp Biên)**: `CustomerBoundary`, `AdminBoundary`. Đóng vai trò là "cánh cửa" tiếp nhận yêu cầu từ Giao diện (UI) hoặc các bộ kiểm thử (Tests).
+*   **Control (Lớp Điều khiển)**: `CampaignManager`, `ProductCatalog`,... Chứa logic điều phối và xử lý quy trình nghiệp vụ.
+*   **Entity (Lớp Thực thể)**: `FlashSaleCampaign`, `FlashSaleInventory`,... Chứa các quy tắc nghiệp vụ cốt lõi và dữ liệu gốc.
+
+### Cơ sở dữ liệu JSON (In-Memory Reset)
+Hệ thống sử dụng file [initial_data.json](file:///c:/Users/complicated/Downloads/New%20folder%20(2)/src/main/resources/initial_data.json) làm nguồn dữ liệu gốc:
+*   **Nạp dữ liệu**: Tự động nạp sản phẩm và chiến dịch mẫu khi khởi động.
+*   **Cơ chế Reset**: Mọi thay đổi trong quá trình chạy (mua hàng, tạo sale) chỉ lưu trên RAM. Khi khởi động lại, hệ thống sẽ tự động reset về trạng thái gốc trong file JSON.
+
+---
+
+## 3. Chi tiết Use Cases & User Stories
 
 ### US1: Hiển thị trạng thái Flash Sale trên sản phẩm
 **User Story**: Là khách hàng, tôi muốn thấy giá ưu đãi, số tiền tiết kiệm được và đồng hồ đếm ngược trên trang sản phẩm để ra quyết định mua hàng nhanh hơn.

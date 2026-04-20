@@ -1,7 +1,10 @@
 package com.cosmetics.flashsale.control;
 
 import com.cosmetics.flashsale.entity.FlashSaleCampaign;
+import com.cosmetics.flashsale.database.JsonDatabase;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * =======================================================
@@ -12,14 +15,24 @@ import java.time.LocalDateTime;
  * =======================================================
  */
 public class CampaignManager {
-    private FlashSaleCampaign currentCampaign;
+    private List<FlashSaleCampaign> campaigns = new ArrayList<>();
+
+    public CampaignManager() {
+        // Nạp danh sách chiến dịch từ cơ sở dữ liệu JSON
+        this.campaigns = new ArrayList<>(JsonDatabase.getInstance().getCampaigns());
+    }
 
     public void createCampaign(LocalDateTime startTime, LocalDateTime endTime, double discountPercent) {
         FlashSaleCampaign campaign = new FlashSaleCampaign(startTime, endTime, discountPercent);
-        this.currentCampaign = campaign;
+        this.campaigns.add(campaign);
+    }
+
+    public List<FlashSaleCampaign> getCampaigns() {
+        return campaigns;
     }
 
     public FlashSaleCampaign getCurrentCampaign() {
-        return currentCampaign;
+        if (campaigns.isEmpty()) return null;
+        return campaigns.get(campaigns.size() - 1);
     }
 }

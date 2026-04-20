@@ -1,0 +1,30 @@
+{
+  "products": [
+    {
+      "productId": "PROD_001",
+      "name": "Son MAC Ruby Woo",
+      "quantity": 50
+    },
+    {
+      "productId": "PROD_002",
+      "name": "Nước hoa Chanel N°5",
+      "quantity": 20
+    },
+    {
+      "productId": "PROD_003",
+      "name": "Kem nền Estee Lauder",
+      "quantity": 30
+    }
+  ],
+  "campaigns": [
+    {
+      "name": "Siêu Sale Mùa Hè",
+      "discountPercent": 30.0,
+      "hoursFromNowStart": -1,
+      "hoursFromNowEnd": 5
+    }
+  ],
+  "analytics": {
+    "totalInitialInventory": 100
+  }
+}

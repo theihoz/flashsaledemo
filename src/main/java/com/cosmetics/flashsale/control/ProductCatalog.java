@@ -11,8 +11,19 @@ import java.util.List;
  * liệt kê các mặt hàng đang áp dụng chương trình Sale.
  * =======================================================
  */
+import com.cosmetics.flashsale.database.JsonDatabase;
+import com.cosmetics.flashsale.entity.FlashSaleInventory;
+import java.util.stream.Collectors;
+
 public class ProductCatalog {
     private List<String> products = new ArrayList<>();
+
+    public ProductCatalog() {
+        // Nạp danh sách tên sản phẩm từ cơ sở dữ liệu JSON
+        this.products = JsonDatabase.getInstance().getInventories().stream()
+                .map(FlashSaleInventory::getProductId)
+                .collect(Collectors.toList());
+    }
     
     public void addProduct(String product) {
         products.add(product);
