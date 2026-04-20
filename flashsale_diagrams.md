@@ -7,7 +7,7 @@
   
   ╔════════════════════╗               ┌────────────────────┐               ⟪──────────────────────⟫
   ║ MÀN HÌNH MUA HÀNG  ║ = Lấy SP ===> │ TRÌNH QUẢN LÝ DANH │ == Truy vấn =>│ DỮ LIỆU CHIẾN DỊCH & │
-  ║ (CustomerBoundary) ║               │ MỤC (ProductCatalog│               │ MỨC GIẢM (Campaign)  │
+  ║ (CustomerBoundary) ║               │ MỤC (ProductCatalog)│               │ MỨC GIẢM (Campaign)  │
   ╚════════════════════╝ <== Trả về == └────────────────────┘ <== Kết quả ==⟪──────────────────────⟫
    Là nơi khách xem, nhấn                Là nhân viên chạy bàn                Là nhà bếp nấu công thức
 ```
@@ -27,19 +27,15 @@ sequenceDiagram
     Boundary->>Control: getProductPrice(productName)
     Control->>Entity: isActive(currentTime)
     
-    rect rgb(235, 255, 235)
         Note right of Control: Luồng 1: Flash Sale Đang mở
         Entity-->>Control: trả về [true, discountPercent]
         Control-->>Boundary: calculatedPrice (Giá đã giảm)
         Boundary-->>Customer: Hiển thị Giá Sale & Đồng hồ
-    end
-    
-    rect rgb(255, 235, 235)
+
         Note right of Control: Luồng 2: Sale đã hết hạn
         Entity-->>Control: trả về [false]
         Control-->>Boundary: originalPrice (Giá gốc)
         Boundary-->>Customer: Hiển thị Giá gốc & Ẩn đồng hồ
-    end
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
@@ -130,19 +126,15 @@ sequenceDiagram
     Boundary->>Control: processOrder(inventory, quantity)
     Control->>Entity: holdInventory(quantity)
     
-    rect rgb(235, 255, 235)
         Note right of Control: Luồng 1: Còn hàng (Happy Path)
         Entity-->>Control: return true (Phép trừ Atomic)
         Control-->>Boundary: orderSuccess: true
         Boundary-->>Customer: Hiển thị "Thành công" & Hóa đơn
-    end
 
-    rect rgb(255, 235, 235)
         Note right of Control: Luồng 2: Hết hàng (Unhappy Path)
         Entity-->>Control: throw IllegalStateException
         Control-->>Boundary: orderSuccess: false
         Boundary-->>Customer: Hiển thị Cảnh báo "Hết hàng"
-    end
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
@@ -211,21 +203,17 @@ sequenceDiagram
     Boundary->>Control: createCampaign(start, end, discount)
     Control->>Entity: new FlashSaleCampaign(start, end, discount)
     
-    rect rgb(255, 235, 235)
         Note right of Entity: Kiểm tra điều kiện ràng buộc
         alt discountPercent > 50% OR startTime >= endTime
             Entity-->>Control: ném IllegalArgumentException
             Control-->>Boundary: error: Thông báo lỗi chi tiết
             Boundary-->>Admin: Hiển thị Tooltip cảnh báo
         end
-    end
 
-    rect rgb(235, 255, 235)
         Note right of Entity: Khi dữ liệu hợp lệ
         Entity-->>Control: Đối tượng được khởi tạo thành công
         Control-->>Boundary: success: Đã lên lịch
         Boundary-->>Admin: Hiển thị "Thành công"
-    end
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
@@ -292,23 +280,19 @@ sequenceDiagram
     Boundary->>Control: calculateReport(analytics)
     Control->>Entity: getSoldPercentage()
     
-    rect rgb(255, 235, 235)
         Note right of Entity: Phòng thủ "Lỗi chia cho 0"
         alt initialTotalProduct == 0
             Entity-->>Control: throw IllegalStateException
             Control-->>Boundary: error: Thiếu cấu hình gốc
             Boundary-->>Admin: Cảnh báo "Cần nhập tồn kho ban đầu"
         end
-    end
 
-    rect rgb(235, 255, 235)
         Note right of Entity: Dữ liệu hợp lệ
         Entity-->>Control: trả về soldPercentage (double)
         Control->>Entity: gọi getTotalRevenue()
         Entity-->>Control: trả về totalRevenue (double)
         Control-->>Boundary: mảng reportData [perc, rev]
         Boundary-->>Admin: Vẽ biểu đồ & Render KPI
-    end
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
@@ -377,21 +361,17 @@ sequenceDiagram
         Entity->>Entity: verify product.availableQuantity > 0
     end
     
-    rect rgb(255, 235, 235)
         Note right of Entity: Phát hiện SP hết hàng
         alt Component: Out of Stock
             Entity-->>Control: ném IllegalStateException
             Control-->>Boundary: error: SP thành phần lỗi
             Boundary-->>Admin: Đánh dấu đỏ SP lỗi trên giao diện
         end
-    end
 
-    rect rgb(235, 255, 235)
         Note right of Entity: Tất cả SP hợp lệ
         Entity-->>Control: trả về đối tượng Combo
         Control-->>Boundary: success: Đã thêm vào danh sách
         Boundary-->>Admin: Hiển thị Combo trong Danh mục Sale
-    end
 ```
 
 **Chi tiết luồng dữ liệu (Data Flow):**
