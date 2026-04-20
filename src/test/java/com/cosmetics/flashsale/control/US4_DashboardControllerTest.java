@@ -4,8 +4,15 @@ import com.cosmetics.flashsale.entity.SaleAnalytics;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class DashboardControllerTest {
+public class US4_DashboardControllerTest {
 
+    /**
+     * [ĐỐI SOÁT NGHIỆP VỤ]
+     * User Story: US4 - Báo cáo hiệu quả thời gian thực
+     * Kịch bản (Scenario): 4.1 - Xem báo cáo khi có đơn hàng
+     * Luồng xử lý (Path): Happy Path (Cập nhật Dashboard thời gian thực)
+     * MỤC TIÊU: Đảm bảo lớp Điều khiển (Control) của Dashboard có khả năng đọc dữ liệu từ lớp Entity phân tích, tính toán chính xác KPI (Doanh thu & Tỷ lệ) để hiển thị cho Quản lý.
+     */
     @Test
     public void testCalculateSoldPercentage() {
         // Giả lập hệ thống Tracking có sức chứa tổng 50 sản phẩm

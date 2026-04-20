@@ -3,7 +3,7 @@ package com.cosmetics.flashsale.entity;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class SaleAnalyticsTest {
+public class US4_SaleAnalyticsTest {
 
     /**
      * [ĐỐI SOÁT NGHIỆP VỤ]

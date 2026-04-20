@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.*;
 
-public class FlashSaleComboTest {
+public class US5_FlashSaleComboTest {
 
     @Test
     public void testCreateCombo_HappyPath() {

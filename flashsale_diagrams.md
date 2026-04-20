@@ -28,19 +28,27 @@ sequenceDiagram
     Control->>Entity: isActive(currentTime)
     
     rect rgb(235, 255, 235)
-        Note right of Control: Case: Flash Sale Active
-        Entity-->>Control: return true & discountPercent
-        Control-->>Boundary: calculatedPrice (Discounted)
-        Boundary-->>Customer: Display FlashPrice & Countdown
+        Note right of Control: Luồng 1: Flash Sale Đang mở
+        Entity-->>Control: trả về [true, discountPercent]
+        Control-->>Boundary: calculatedPrice (Giá đã giảm)
+        Boundary-->>Customer: Hiển thị Giá Sale & Đồng hồ
     end
     
     rect rgb(255, 235, 235)
-        Note right of Control: Case: Flash Sale Expired
-        Entity-->>Control: return false
-        Control-->>Boundary: originalPrice
-        Boundary-->>Customer: Display OriginalPrice & Hide clock
+        Note right of Control: Luồng 2: Sale đã hết hạn
+        Entity-->>Control: trả về [false]
+        Control-->>Boundary: originalPrice (Giá gốc)
+        Boundary-->>Customer: Hiển thị Giá gốc & Ẩn đồng hồ
     end
 ```
+
+**Chi tiết luồng dữ liệu (Data Flow):**
+*   **Dữ liệu vào (Input):** `campaign` (đối tượng chiến dịch), `productName` (tên sản phẩm cần xem).
+*   **Tiến trình xử lý (Processing):**
+    *   `CustomerBoundary` đóng vai trò chuyển tiếp yêu cầu, không giữ logic tính toán.
+    *   `ProductCatalog` đóng vai trò "trung tâm tính toán": nhận `discountPercent` từ Entity để áp dụng công thức: `Price * (1 - discount/100)`.
+    *   `FlashSaleCampaign` chỉ chịu trách nhiệm về trạng thái thời gian (Trạng thái logic: True/False).
+*   **Kết quả trả về (Result):** Một chuỗi định dạng (String) chứa giá tiền cuối cùng hoặc thông tin lỗi để hiển thị trực tiếp lên UI.
 
 ### 3. Sơ đồ Trạng Thái (State Diagram)
 > **Giải thích:** Vòng đời của một chiến dịch đi từ lúc ngủ đông đến lúc tự đào thải.
@@ -122,16 +130,28 @@ sequenceDiagram
     Boundary->>Control: processOrder(inventory, quantity)
     Control->>Entity: holdInventory(quantity)
     
-    alt Status: IN STOCK
-        Entity-->>Control: return true (Atomic decrement)
+    rect rgb(235, 255, 235)
+        Note right of Control: Luồng 1: Còn hàng (Happy Path)
+        Entity-->>Control: return true (Phép trừ Atomic)
         Control-->>Boundary: orderSuccess: true
-        Boundary-->>Customer: Display "Success" Toast & Invoice
-    else Status: OUT OF STOCK
+        Boundary-->>Customer: Hiển thị "Thành công" & Hóa đơn
+    end
+
+    rect rgb(255, 235, 235)
+        Note right of Control: Luồng 2: Hết hàng (Unhappy Path)
         Entity-->>Control: throw IllegalStateException
         Control-->>Boundary: orderSuccess: false
-        Boundary-->>Customer: Display "Out of Stock" Warning
+        Boundary-->>Customer: Hiển thị Cảnh báo "Hết hàng"
     end
 ```
+
+**Chi tiết luồng dữ liệu (Data Flow):**
+*   **Dữ liệu vào (Input):** `inventory` (đối tượng thực thể quản lý kho), `quantity` (số lượng khách đặt mua - phải > 0).
+*   **Tiến trình xử lý (Processing):**
+    *   `OrderCheckout` gọi phương thức `holdInventory(quantity)`.
+    *   **Tại Entity:** Dữ liệu `availableQuantity` được bảo vệ bởi từ khóa `synchronized`. 
+    *   **Logic:** Hệ thống kiểm tra điều kiện `if (availableQuantity >= quantity)`. Nếu thỏa mãn, thực hiện phép trừ trực tiếp vào vùng nhớ RAM (Database tạm thời).
+*   **Đầu ra (Output):** Trả về trạng thái `true` để Control tiếp tục luồng tạo hóa đơn, hoặc ném lỗi ngay lập tức để ngắt giao dịch nếu kho không đủ.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text
@@ -191,16 +211,29 @@ sequenceDiagram
     Boundary->>Control: createCampaign(start, end, discount)
     Control->>Entity: new FlashSaleCampaign(start, end, discount)
     
-    alt discountPercent > 50%
-        Entity-->>Control: throw IllegalArgumentException
-        Control-->>Boundary: error: Discount too high
-        Boundary-->>Admin: Show Tooltip "Limit exceeded (50%)"
-    else discountPercent <= 50%
-        Entity-->>Control: object initialized
-        Control-->>Boundary: success: Campaign scheduled
-        Boundary-->>Admin: Display "Campaign created successfully"
+    rect rgb(255, 235, 235)
+        Note right of Entity: Kiểm tra điều kiện ràng buộc
+        alt discountPercent > 50% OR startTime >= endTime
+            Entity-->>Control: ném IllegalArgumentException
+            Control-->>Boundary: error: Thông báo lỗi chi tiết
+            Boundary-->>Admin: Hiển thị Tooltip cảnh báo
+        end
+    end
+
+    rect rgb(235, 255, 235)
+        Note right of Entity: Khi dữ liệu hợp lệ
+        Entity-->>Control: Đối tượng được khởi tạo thành công
+        Control-->>Boundary: success: Đã lên lịch
+        Boundary-->>Admin: Hiển thị "Thành công"
     end
 ```
+
+**Chi tiết luồng dữ liệu (Data Flow):**
+*   **Dữ liệu vào (Input):** `startTime`, `endTime` (LocalDateTime), `discountPercent` (double).
+*   **Tiến trình xử lý (Processing):**
+    *   Dữ liệu thô từ Giao diện được `AdminBoundary` đóng gói và gửi tới `CampaignManager`.
+    *   **Chốt chặn cuối (Entity Constructor):** Đây là nơi dữ liệu bị kiểm soát gắt gao nhất. Nếu logic `end.isBefore(start)` hoặc `discount > 50.0` là đúng, tiến trình khởi tạo object sẽ bị hủy bỏ ngay lập tức (Fail-fast).
+*   **Kết quả (Result):** Một thực thể `FlashSaleCampaign` sạch được nạp vào RAM, sẵn sàng để đồng bộ với `initial_data.json` nếu cần, đảm bảo hệ thống không bao giờ vận hành với thông số sai.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text
@@ -240,7 +273,7 @@ sequenceDiagram
   
   ╔════════════════════╗               ┌────────────────────┐               ⟪──────────────────────⟫
   ║ TẤM NỀN CHARTIST   ║ = Yêu cầu ==> │ CỘNG TÁC VIÊN ĐỌC  │ === Chọc ===> │ MÁY QUÉT KPI NHÀ KHO │
-  ║(DashboardBoundary) ║               │ (DashboardControl  │               │   (SaleAnalytics)    │
+  ║(DashboardBoundary) ║               │ (DashboardControl)  │               │   (SaleAnalytics)    │
   ╚════════════════════╝ <== Đồ Thị == └────────────────────┘ <== Kết quả ==⟪──────────────────────⟫
 ```
 
@@ -259,18 +292,32 @@ sequenceDiagram
     Boundary->>Control: calculateReport(analytics)
     Control->>Entity: getSoldPercentage()
     
-    alt initialTotalProduct == 0
-        Entity-->>Control: throw IllegalStateException
-        Control-->>Boundary: error: Config Missing
-        Boundary-->>Admin: Display Warning "Inventory setting required"
-    else Data Valid
-        Entity-->>Control: return soldPercentage
-        Control->>Entity: getTotalRevenue()
-        Entity-->>Control: return totalRevenue
-        Control-->>Boundary: reportData(perc, rev)
-        Boundary-->>Admin: Render Charts & KPI Stats
+    rect rgb(255, 235, 235)
+        Note right of Entity: Phòng thủ "Lỗi chia cho 0"
+        alt initialTotalProduct == 0
+            Entity-->>Control: throw IllegalStateException
+            Control-->>Boundary: error: Thiếu cấu hình gốc
+            Boundary-->>Admin: Cảnh báo "Cần nhập tồn kho ban đầu"
+        end
+    end
+
+    rect rgb(235, 255, 235)
+        Note right of Entity: Dữ liệu hợp lệ
+        Entity-->>Control: trả về soldPercentage (double)
+        Control->>Entity: gọi getTotalRevenue()
+        Entity-->>Control: trả về totalRevenue (double)
+        Control-->>Boundary: mảng reportData [perc, rev]
+        Boundary-->>Admin: Vẽ biểu đồ & Render KPI
     end
 ```
+
+**Chi tiết luồng dữ liệu (Data Flow):**
+*   **Dữ liệu vào (Input):** `analytics` (Thực thể chứa các biến tích lũy `totalRevenue` và `soldQuantity`).
+*   **Tiến trình xử lý (Processing):**
+    *   `DashboardController` thu thập các giá trị nguyên bản từ Entity.
+    *   **Xử lý số liệu:** Thực hiện phép chia tỷ lệ và bọc trong cơ chế kiểm soát lỗi `initialTotal == 0`.
+    *   Dữ liệu được đóng gói vào một mảng `double[]` để tối ưu tốc độ truyền tải giữa các Layer.
+*   **Kết quả (Result):** Trả về mảng dữ liệu định dạng chuẩn, giúp Boundary hiển thị doanh thu (ví dụ: 50,000,000) và tỷ lệ (ví dụ: 80%) mà không cần truy vấn lại Database.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text
@@ -326,20 +373,34 @@ sequenceDiagram
     Boundary->>Control: createCombo(name, products, price, discount)
     Control->>Entity: new FlashSaleCombo(name, products, price, discount)
     
-    loop Product Validation (Constructor)
-        Entity->>Entity: check product.getAvailableQuantity()
+    loop Kiểm tra từng sản phẩm (Validate Each)
+        Entity->>Entity: verify product.availableQuantity > 0
     end
     
-    alt Component: Out of Stock (quantity <= 0)
-        Entity-->>Control: throw IllegalStateException
-        Control-->>Boundary: error: Member out of stock
-        Boundary-->>Admin: Highlight invalid product in UI
-    else All Components: OK
-        Entity-->>Control: return combo object
-        Control-->>Boundary: success: Combo added to list
-        Boundary-->>Admin: Display Combo in Flash Sale Catalog
+    rect rgb(255, 235, 235)
+        Note right of Entity: Phát hiện SP hết hàng
+        alt Component: Out of Stock
+            Entity-->>Control: ném IllegalStateException
+            Control-->>Boundary: error: SP thành phần lỗi
+            Boundary-->>Admin: Đánh dấu đỏ SP lỗi trên giao diện
+        end
+    end
+
+    rect rgb(235, 255, 235)
+        Note right of Entity: Tất cả SP hợp lệ
+        Entity-->>Control: trả về đối tượng Combo
+        Control-->>Boundary: success: Đã thêm vào danh sách
+        Boundary-->>Admin: Hiển thị Combo trong Danh mục Sale
     end
 ```
+
+**Chi tiết luồng dữ liệu (Data Flow):**
+*   **Dữ liệu vào (Input):** `List<FlashSaleInventory>` (Danh sách thực thể các sản phẩm thành phần), mức giảm giá `discount`.
+*   **Tiến trình xử lý (Processing):**
+    *   `ComboManager` đóng vai trò là "người thu gom", kết nối các sản phẩm lẻ lại với nhau.
+    *   **Luồng kiểm tra (Deep Validation):** Entity thực hiện vòng lặp `for-each` để quét toàn bộ danh sách. 
+    *   **Business Rule:** Nếu bất kỳ sản phẩm nào có `availableQuantity <= 0`, toàn bộ logic khởi tạo Combo sẽ bị hủy bỏ (Transactional consistency).
+*   **Kết quả (Result):** Một thực thể `FlashSaleCombo` đa thành phần được đăng ký thành công, hoặc thông báo lỗi chỉ rõ sản phẩm nào đang cản trở việc tạo Combo.
 
 ### 3. Thiết kế Cấu trúc file & Màn hình hiển thị
 ```text

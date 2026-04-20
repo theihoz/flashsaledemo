@@ -4,7 +4,7 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 import static org.junit.Assert.*;
 
-public class FlashSaleCampaignTest {
+public class US1_FlashSaleCampaignTest {
 
     /**
      * [ĐỐI SOÁT NGHIỆP VỤ]

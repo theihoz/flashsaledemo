@@ -5,11 +5,17 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 import static org.junit.Assert.*;
 
-public class CampaignManagerTest {
+public class US3_CampaignManagerTest {
 
+    /**
+     * [ĐỐI SOÁT NGHIỆP VỤ]
+     * User Story: US3 - Thiết lập chiến dịch (Dành cho Quản lý)
+     * Kịch bản (Scenario): 3.1 - Tạo chiến dịch hợp lệ
+     * Luồng xử lý (Path): Happy Path (Lên lịch thành công)
+     * MỤC TIÊU: Kiểm tra lớp Điều khiển (Control) trong việc tiếp nhận yêu cầu từ Admin, khởi tạo Entity chiến dịch với dữ liệu hợp lệ và lưu trữ vào hệ thống.
+     */
     @Test
     public void testCreateCampaign_HappyPath() {
-        // [Acceptance Test]: US3 - Scenario 3.1 (Happy Path)
         CampaignManager manager = new CampaignManager();
         LocalDateTime t1 = LocalDateTime.now();
         LocalDateTime t2 = t1.plusHours(1);
