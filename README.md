@@ -1,7 +1,7 @@
 # TÀI LIỆU YÊU CẦU: TÍNH NĂNG FLASH SALE TOÀN DIỆN (BA + BDD)
 
 ## 1. Giới thiệu (Mục tiêu Nghiệp vụ)
-Tính năng Flash Sale tạo ra sự khan hiếm chiến lược để thúc đẩy chốt đơn nhanh. Trong bối cảnh thương mại điện tử 2026, tính năng này không chỉ phục vụ khách hàng trực tiếp mà còn phải tối ưu hóa dữ liệu (cấu trúc rõ ràng) để các Trợ lý AI (AI Shopping Agents) có thể đọc, so sánh giá và tự động chốt đơn thay cho người dùng.
+Tính năng Flash Sale tạo ra sự khan hiếm chiến lược để thúc đẩy chốt đơn nhanh.
 Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slicing), tuân thủ nghiêm ngặt mô hình kiến trúc **BCE (Boundary - Control - Entity)** và sử dụng **JSON Database** để quản lý dữ liệu khởi tạo.
 
 ---
