@@ -4,8 +4,14 @@ package com.cosmetics.flashsale.entity;
  * =======================================================
  * MÔ HÌNH THỰC THỂ (ENTITY): FlashSaleInventory
  * Thuộc chức năng: US2 - Xử lý tồn kho và thanh toán
- * Mục đích: Lưu trữ số lượng sản phẩm đang có trong kho ảo
- * và xử lý nghiệp vụ trừ kho an toàn (Synchronized) chống kẹt.
+ * 
+ * QUY TẮC NGHIỆP VỤ (BUSINESS RULES):
+ * 1. Đảm bảo chốt đúng số lượng tồn kho còn lại thực tế.
+ * 2. Ngăn chặn việc mua quá suất (Overselling) trong thời lượng cực ngắn.
+ * 
+ * LOGIC XỬ LÝ (BUSINESS LOGIC):
+ * - Sử dụng cơ chế 'Xếp hàng' (Synchronized) để xử lý tuần tự các yêu cầu trừ kho.
+ * - Kiểm tra số lượng khả dụng trước khi thực hiện giao dịch (Check-then-Act).
  * =======================================================
  */
 public class FlashSaleInventory {

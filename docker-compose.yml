@@ -1,9 +1,28 @@
 version: '3.8'
 
 services:
+  # Ứng dụng Frontend (Chế độ Phát triển)
   flash-sale-app:
-    build: .
-    container_name: flash-sale-container
+    build:
+      context: .
+      target: dev
+    container_name: flash-sale-dev-container
     ports:
-      - "3000:80"
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
     restart: always
+
+  # Dịch vụ chạy BDD Tests (Cucumber + Playwright)
+  flash-sale-tester:
+    image: mcr.microsoft.com/playwright/java:v1.39.0-jammy
+    container_name: flash-sale-bdd-tester
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ~/.m2:/root/.m2
+    # Lệnh chạy test, sử dụng --fail-at-end để thu thập đủ kết quả
+    command: mvn test -Dcucumber.options="--plugin pretty"
+    depends_on:
+      - flash-sale-app

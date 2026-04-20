@@ -4,8 +4,14 @@ package com.cosmetics.flashsale.entity;
  * =======================================================
  * MÔ HÌNH THỰC THỂ (ENTITY): SaleAnalytics
  * Thuộc chức năng: US4 - Báo cáo hiệu quả thời gian thực
- * Mục đích: Nắm giữ dữ liệu phân tích, đo lường tự động
- * phần trăm sản phẩm bán ra và tính tổng doạnh thu vận hành.
+ * 
+ * QUY TẮC NGHIỆP VỤ (BUSINESS RULES):
+ * 1. Dữ liệu báo cáo phải được cập nhật ngay sau khi thanh toán thành công (Real-time).
+ * 2. Ngăn chặn lỗi chia cho 0 nếu chưa cấu hình số lượng khởi tạo.
+ * 
+ * LOGIC XỬ LÝ (BUSINESS LOGIC):
+ * - Cơ chế 'Cập nhật cộng dồn' giúp ghi nhận doanh thu tức thì.
+ * - Kiểm tra mẫu số (totalInitialInventory) trước khi tính tỷ lệ phần trăm (Protect logic).
  * =======================================================
  */
 public class SaleAnalytics {

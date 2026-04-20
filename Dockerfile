@@ -1,24 +1,23 @@
-# Giai đoạn 1: Xây dựng (Build) ứng dụng Frontend
-FROM node:18-alpine AS build
-
+# Giai đoạn cơ sở (Base): Cài đặt thư viện
+FROM node:18-alpine AS base
 WORKDIR /app
-
-# Sao chép file quản lý thư viện và cài đặt
 COPY package*.json ./
 RUN npm install
 
-# Sao chép toàn bộ mã nguồn và biên dịch (Build)
+# Giai đoạn Phát triển (Dev): Hỗ trợ hot-reload
+FROM base AS dev
+COPY . .
+EXPOSE 5173
+# Cần --host để Vite lắng nghe kết nối từ bên ngoài container
+CMD ["npm", "run", "dev", "--", "--host"]
+
+# Giai đoạn Xây dựng (Build)
+FROM base AS build
 COPY . .
 RUN npm run build
 
-# Giai đoạn 2: Máy chủ phục vụ (Serve) bằng Nginx
-FROM nginx:stable-alpine
-
-# Sao chép các file tĩnh từ giai đoạn build vào thư mục của Nginx
+# Giai đoạn Chính thức (Production): Dùng Nginx
+FROM nginx:stable-alpine AS final
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Mở cổng 80 cho container
 EXPOSE 80
-
-# Khởi động Nginx
 CMD ["nginx", "-g", "daemon off;"]

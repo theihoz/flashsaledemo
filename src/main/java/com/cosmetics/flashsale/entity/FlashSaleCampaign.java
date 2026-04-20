@@ -6,8 +6,14 @@ import java.time.LocalDateTime;
  * =======================================================
  * MÔ HÌNH THỰC THỂ (ENTITY): FlashSaleCampaign
  * Thuộc chức năng: US3 - Thiết lập chiến dịch Flash Sale
- * Mục đích: Lưu trữ cấu hình chiến dịch, đảm bảo quy định 
- * giảm giá không vượt 50% và thời gian diễn ra hợp lệ.
+ * 
+ * QUY TẮC NGHIỆP VỤ (BUSINESS RULES):
+ * 1. Mức giảm giá tối đa không được vượt quá 50% (Quy định kinh doanh).
+ * 2. Thời gian bắt đầu phải luôn đứng trước thời gian kết thúc (Logic hợp lệ).
+ * 
+ * LOGIC XỬ LÝ (BUSINESS LOGIC):
+ * - Ràng buộc được thực thi ngay trong Constructor để ngăn dữ liệu sai lệch.
+ * - Sử dụng LocalDateTime để đối soát thời gian thực chuẩn xác.
  * =======================================================
  */
 public class FlashSaleCampaign {

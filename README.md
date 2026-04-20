@@ -9,7 +9,15 @@ Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slic
 ## 2. Chi tiết Use Cases & User Stories
 
 ### US1: Hiển thị trạng thái Flash Sale trên sản phẩm
-**Use Case / Business Rules**: Là khách hàng, tôi muốn thấy giá ưu đãi, số tiền tiết kiệm được và đồng hồ đếm ngược trên trang sản phẩm để ra quyết định mua hàng nhanh hơn.
+**User Story**: Là khách hàng, tôi muốn thấy giá ưu đãi, số tiền tiết kiệm được và đồng hồ đếm ngược trên trang sản phẩm để ra quyết định mua hàng nhanh hơn.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Hệ thống chỉ hiển thị các thông tin Flash Sale khi chiến dịch đang ở trạng thái hiệu lực (`Active`).
+*   Dữ liệu đếm ngược phải được đồng bộ với thời gian thực của máy chủ (Server Time).
+
+**Logic xử lý (Business Logic):**
+*   Hệ thống đóng vai trò "người canh gác thời gian", liên tục đối soát đồng hồ thực tế với lịch trình đã cài đặt. Chỉ khi đồng hồ nằm trong khung giờ quy định, chế độ Flash Sale mới được kích hoạt.
+*   Ngay khi hết giờ, hệ thống tự động gỡ bỏ đồng hồ đếm ngược và trả giá sản phẩm về mức bình thường mà không cần con người can thiệp thủ công.
 
 - **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
   - **Scenario 1.1 (Happy Path) - Xem sản phẩm trong giờ Flash Sale**
@@ -26,7 +34,15 @@ Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slic
 ---
 
 ### US2: Xử lý tồn kho và thanh toán
-**Use Case / Business Rules**: Là khách hàng, tôi muốn hệ thống chốt đúng giá ưu đãi nếu tôi mua trong giới hạn số lượng cho phép, để đảm bảo tính công bằng.
+**User Story**: Là khách hàng, tôi muốn hệ thống chốt đúng giá ưu đãi nếu tôi mua trong giới hạn số lượng cho phép, để đảm bảo tính công bằng.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Việc kiểm tra và trừ tồn kho Flash Sale phải được thực hiện đồng bộ (Synchronized) để tránh tình trạng bán quá mức (Overselling).
+*   Nếu tồn kho Flash Sale về 0, hệ thống phải tự động chuyển hướng người dùng về giá gốc của sản phẩm ngay tại bước thanh toán.
+
+**Logic xử lý (Business Logic):**
+*   Để tránh tình trạng "bán lố" khi có quá nhiều người cùng mua một lúc, hệ thống buộc các đơn hàng phải xếp hàng chờ xử lý tuần tự. Mỗi món hàng chỉ được trừ đi khi chắc chắn vẫn còn chỗ trong kho.
+*   Nếu khách hàng đang thao tác mà hàng bất ngờ hết, hệ thống sẽ ngay lập tức thông báo và chuyển mức giá về giá gốc để đảm bảo tính minh bạch, tránh việc khách hàng mua hớ.
 
 - **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
   - **Scenario 2.1 (Happy Path) - Thanh toán hợp lệ**
@@ -43,7 +59,15 @@ Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slic
 ---
 
 ### US3: Thiết lập chiến dịch (Dành cho Quản lý)
-**Use Case / Business Rules**: Là Quản lý cửa hàng, tôi muốn lên lịch Ngày & Giờ và cấu hình mức giảm giá cho chiến dịch để hệ thống tự động chạy.
+**User Story**: Là Quản lý cửa hàng, tôi muốn lên lịch Ngày & Giờ và cấu hình mức giảm giá cho chiến dịch để hệ thống tự động chạy.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Mức giảm giá tối đa cho phép là **50%** (Constraint theo quy định kinh doanh).
+*   Thời gian bắt đầu (Start Time) phải luôn nhỏ hơn thời gian kết thúc (End Time).
+
+**Logic xử lý (Business Logic):**
+*   Hệ thống đóng vai trò một "bộ lọc thông minh". Nó sẽ từ chối ngay lập tức mọi yêu cầu tạo chiến dịch nếu phát hiện sai sót (như giảm giá quá sâu trên 50% hoặc thời gian bắt đầu muộn hơn thời gian kết thúc).
+*   Cơ chế này đảm bảo dữ liệu của cửa hàng luôn sạch và không bao giờ xảy ra tình trạng hiển thị sai thông tin gây hiểu lầm cho khách hàng.
 
 - **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
   - **Scenario 3.1 (Happy Path) - Tạo chiến dịch hợp lệ**
@@ -60,7 +84,15 @@ Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slic
 ---
 
 ### US4: Báo cáo hiệu quả thời gian thực (Dành cho Quản lý)
-**Use Case / Business Rules**: Là Quản lý cửa hàng, tôi muốn xem doanh thu và tỷ lệ bán ra theo thời gian thực để quyết định bổ sung hàng hoặc thay đổi chiến lược marketing.
+**User Story**: Là Quản lý cửa hàng, tôi muốn xem doanh thu và tỷ lệ bán ra theo thời gian thực để quyết định bổ sung hàng hoặc thay đổi chiến lược marketing.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Dữ liệu doanh thu và tỷ lệ bán ra phải được cập nhật ngay lập tức sau mỗi giao dịch thanh toán thành công (Real-time).
+*   Hệ thống phải chặn việc tính toán tỷ lệ nếu tổng số lượng hàng ban đầu chưa được cấu hình (phòng lỗi chia cho 0).
+
+**Logic xử lý (Business Logic):**
+*   Hệ thống sử dụng cơ chế "ghi nhận tức thì". Mỗi khi có một đơn hàng thành công, số liệu doanh thu trên màn hình quản lý sẽ nhảy số ngay lập tức mà không cần tải lại trang.
+*   Trong trường hợp có lỗi dữ liệu đầu vào (ví dụ số lượng sản phẩm bằng 0), hệ thống sẽ hiển thị 0% thay vì báo lỗi hệ thống, giúp màn hình quản lý luôn hoạt động ổn định.
 
 - **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
   - **Scenario 4.1 (Happy Path) - Xem báo cáo khi có đơn hàng**
@@ -77,7 +109,16 @@ Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slic
 ---
 
 ### US5: Quản lý Sản phẩm và Combo Sale
-**Use Case / Business Rules**: Là Quản lý cửa hàng, tôi muốn gộp nhiều sản phẩm thành một Combo Flash Sale để đẩy hàng tồn kho nhanh hơn.
+**User Story**: Là Quản lý cửa hàng, tôi muốn gộp nhiều sản phẩm thành một Combo Flash Sale để đẩy hàng tồn kho nhanh hơn.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Mỗi gói Combo phải chứa ít nhất một mã sản phẩm hợp lệ.
+*   Không cho phép tạo Combo nếu một trong các sản phẩm thành phần đã hết hàng trong kho.
+*   Số lượng Combo khả dụng được tính tự động dựa trên sản phẩm có tồn kho thấp nhất trong gói.
+
+**Logic xử lý (Business Logic):**
+*   Hệ thống tự động tính toán dựa trên "mắt xích yếu nhất". Ví dụ: Một Combo gồm 1 son và 1 nước hoa, nếu chỉ còn 2 thỏi son nhưng có 10 chai nước hoa, hệ thống sẽ báo chỉ còn 2 bộ Combo khả dụng.
+*   Khi một sản phẩm được bán lẻ (không nằm trong combo), hệ thống cũng sẽ tự động tính toán lại số lượng của tất cả các bộ Combo có chứa sản phẩm đó để khách hàng không bao giờ đặt nhầm hàng đã hết.
 
 - **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
   - **Scenario 5.1 (Happy Path) - Tạo Combo hợp lệ**
@@ -92,7 +133,7 @@ Hệ thống được xây dựng theo phương pháp Cắt dọc (Vertical Slic
 
 ---
 
-## 3. Hướng dẫn chạy dự án
+## 4. Hướng dẫn chạy dự án
 
 ### Yêu cầu hệ thống:
 - Cài đặt Java 8 hoặc mới hơn.
