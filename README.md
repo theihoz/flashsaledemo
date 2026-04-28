@@ -203,6 +203,97 @@ Hệ thống sử dụng file [initial_data.json] làm nguồn dữ liệu gốc
     - **When**: Nhấn "Tạo Combo".
     - **Then**: Hệ thống báo lỗi "Combo phải có ít nhất 1 sản phẩm".
 
+### US6: Thêm mới và Xóa Sản phẩm khỏi Chiến dịch Flash Sale
+**User Story**: Là Quản lý cửa hàng, tôi muốn thêm mới hoặc xóa các sản phẩm trong chiến dịch Flash Sale để linh hoạt điều chỉnh danh mục khuyến mãi theo thực tế tồn kho và chiến lược bán hàng.
+
+- **Đảm bảo tính INVEST**:
+  - **I (Independent)**: Logic thêm/xóa sản phẩm tách biệt với các phiên sale khác và luồng thanh toán.
+  - **N (Negotiable)**: Các tiêu chí chọn sản phẩm có thể thảo luận để tối ưu giao diện.
+  - **V (Valuable)**: Giúp chủ shop tối ưu hóa hàng tồn kho bằng cách đưa các sản phẩm mỹ phẩm đang dư vào Flash Sale kịp thời.
+  - **E (Estimable)**: Có thể ước lượng dựa trên các thao tác quản lý dữ liệu (CRUD) cơ bản.
+  - **S (Small)**: Tập trung duy nhất vào việc quản lý danh sách sản phẩm tham gia một chiến dịch.
+  - **T (Testable)**: Kiểm thử được bằng cách xác minh sự thay đổi trong danh sách sản phẩm khuyến mãi.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Một mã sản phẩm mỹ phẩm không thể được thêm hai lần vào cùng một phiên Flash Sale.
+*   Sản phẩm khi thêm vào bắt buộc phải được thiết lập giá Flash Sale và giới hạn số lượng bán ra.
+*   Khi xóa sản phẩm khỏi chiến dịch đang diễn ra, sản phẩm đó phải quay lại giá gốc ngay lập tức để bảo vệ doanh thu.
+
+**Logic xử lý (Business Logic):**
+*   Hệ thống đóng vai trò "người quản kho linh hoạt". Nó cho phép Quản lý tùy biến danh mục "đặc sản" của ngày hôm đó dựa trên tình hình kinh doanh thực tế của cửa hàng.
+*   Trong trường hợp một sản phẩm mỹ phẩm bất ngờ bị lỗi lô hàng hoặc cháy hàng tại kho tổng, Quản lý có thể nhanh chóng gỡ bỏ nó khỏi chiến dịch Flash Sale để tránh việc khách hàng đặt mua không thành công, giữ vững uy tín thương hiệu.
+
+- **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
+  - **Scenario 6.1 (Happy Path) - Thêm sản phẩm mỹ phẩm hợp lệ**
+    - **Given**: Quản lý đang ở trang quản lý sản phẩm của chiến dịch "Lễ Hội Son Môi".
+    - **When**: Chọn sản phẩm "Son Kem Lì Black Rouge", đặt giá Flash Sale "150.000 VNĐ", số lượng "50" và nhấn "Thêm".
+    - **Then**: Hệ thống thêm sản phẩm vào danh sách và báo "Thêm sản phẩm thành công".
+  - **Scenario 6.2 (Unhappy Path) - Thêm sản phẩm đã tồn tại trong chiến dịch**
+    - **Given**: Sản phẩm "Nước tẩy trang Bioderma" đã có trong danh mục Flash Sale.
+    - **When**: Quản lý cố gắng thêm lại "Nước tẩy trang Bioderma" vào cùng chiến dịch đó.
+    - **Then**: Hệ thống chặn thao tác và báo lỗi "Sản phẩm đã tồn tại trong chiến dịch Flash Sale này".
+  - **Scenario 6.3 (Happy Path) - Xóa sản phẩm khỏi chiến dịch**
+    - **Given**: Sản phẩm "Mặt nạ ngủ Laneige" đang nằm trong danh sách của chiến dịch Flash Sale.
+    - **When**: Quản lý nhấn nút "Xóa" cạnh sản phẩm và xác nhận.
+    - **Then**: Hệ thống loại bỏ sản phẩm khỏi danh sách chiến dịch và khôi phục giá bán lẻ thông thường.
+
+### US7: Phân loại sản phẩm theo danh mục
+**User Story**: Là khách hàng, tôi muốn lọc sản phẩm theo danh mục (Son môi, Nước hoa, Kem dưỡng...) để nhanh chóng tìm thấy món đồ mỹ phẩm mình yêu thích trong đợt Sale.
+
+- **Đảm bảo tính INVEST**:
+    - **I (Independent)**: Tính năng lọc danh mục tách biệt với logic thanh toán và cấu hình chiến dịch.
+    - **N (Negotiable)**: Các tiêu chí lọc (theo thương hiệu, theo công dụng) có thể mở rộng thêm.
+    - **V (Valuable)**: Giúp khách hàng tiết kiệm thời gian và tăng khả năng chốt đơn sản phẩm đúng nhu cầu.
+    - **E (Estimable)**: Dựa trên việc phân loại thuộc tính sản phẩm trong database.
+    - **S (Small)**: Chỉ tập trung vào việc hiển thị danh sách theo bộ lọc.
+    - **T (Testable)**: Kiểm thử được bằng cách so sánh danh sách hiển thị với thuộc tính danh mục của sản phẩm.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Hệ thống chỉ hiển thị các danh mục có sản phẩm đang áp dụng Flash Sale.
+*   Nếu một danh mục được chọn không có sản phẩm đang sale, hệ thống phải cung cấp gợi ý thay thế (Fallback recommendation).
+
+**Logic xử lý (Business Logic):**
+*   Hệ thống đóng vai trò "người hướng dẫn mua sắm". Nó lọc dữ liệu theo thời gian thực dựa trên thẻ (tag) danh mục của từng sản phẩm.
+*   Để tránh trải nghiệm "trang trống" gây hụt hẫng, hệ thống tự động quét và đề xuất các sản phẩm "Hot Sale" khác nếu danh mục khách chọn hiện tại đang rỗng.
+
+- **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
+    - **Scenario 7.1 (Happy Path) - Lọc danh mục mỹ phẩm thành công**
+        - **Given**: Khách hàng đang ở trang Flash Sale tổng hợp.
+        - **When**: Khách hàng chọn bộ lọc danh mục "Son môi".
+        - **Then**: Hệ thống tải lại danh sách và chỉ hiển thị các sản phẩm thuộc danh mục "Son môi" đang có giá Flash Sale.
+    - **Scenario 7.2 (Unhappy Path) - Danh mục không có sản phẩm Flash Sale**
+        - **Given**: Đợt sale hiện tại không có sản phẩm thuộc danh mục "Nước hoa".
+        - **When**: Khách hàng chọn bộ lọc "Nước hoa".
+        - **Then**: Hệ thống hiển thị thông báo "Rất tiếc, chưa có sản phẩm nào trong danh mục này đang giảm giá" và đề xuất danh mục "Bán chạy nhất" bên dưới.
+
+### US8: Lịch sử đơn hàng chi tiết
+**User Story**: Là khách hàng, tôi muốn xem lại lịch sử các đơn hàng Flash Sale đã mua để theo dõi số tiền đã tiết kiệm được và trạng thái đơn hàng.
+
+- **Đảm bảo tính INVEST**:
+    - **I (Independent)**: Dữ liệu đơn hàng được lưu trữ sau khi thanh toán, không ảnh hưởng đến luồng mua hàng mới.
+    - **N (Negotiable)**: Thông tin hiển thị (ngày giao dự kiến, tích điểm) có thể bổ sung sau.
+    - **V (Valuable)**: Tạo lòng tin cho khách hàng và ghi nhận giá trị thực tế mà họ nhận được sau mỗi đợt sale.
+    - **E (Estimable)**: Truy xuất từ bảng dữ liệu đơn hàng (Orders).
+    - **S (Small)**: Tập trung vào việc truy vấn và hiển thị thông tin lịch sử.
+    - **T (Testable)**: Đối soát thông số đơn hàng hiển thị với dữ liệu ghi nhận trong database.
+
+**Quy tắc Nghiệp vụ (Business Rules):**
+*   Thông tin "Số tiền tiết kiệm" phải được tính toán dựa trên chênh lệch giữa giá gốc và giá Flash Sale tại thời điểm mua.
+*   Chỉ hiển thị lịch sử đơn hàng cho người dùng đã đăng nhập hoặc thông qua mã đơn hàng hợp lệ.
+
+**Logic xử lý (Business Logic):**
+*   Hệ thống hoạt động như một "cuốn nhật ký mua sắm". Nó lưu lại "khoảnh khắc giá tốt" để khách hàng cảm thấy thành tựu khi săn được deal hời.
+*   Trong trường hợp chưa có dữ liệu, hệ thống khéo léo dẫn dắt khách hàng quay lại phễu bán hàng bằng các nút kêu gọi hành động (CTA) thu hút.
+
+- **Acceptance Criteria (Tiêu chí chấp nhận) & Các Paths**:
+    - **Scenario 8.1 (Happy Path) - Xem trạng thái đơn hàng Flash Sale chi tiết**
+        - **Given**: Khách hàng đã đặt thành công đơn hàng trong đợt Flash Sale.
+        - **When**: Khách hàng truy cập mục "Lịch sử đơn hàng".
+        - **Then**: Hệ thống hiển thị đầy đủ tên sản phẩm, mức giá đã mua, số tiền tiết kiệm được và trạng thái "Đang đóng gói".
+    - **Scenario 8.2 (Unhappy Path) - Khách hàng chưa có lịch sử mua hàng**
+        - **Given**: Khách hàng mới đăng ký tài khoản và chưa mua hàng.
+        - **When**: Khách hàng truy cập mục "Lịch sử đơn hàng".
+        - **Then**: Hệ thống hiển thị thông báo "Bạn chưa có đơn hàng nào" và hiện nút "Khám phá deal Hot" dẫn về trang chủ.
 
 ---
 
@@ -222,4 +313,4 @@ mvn clean test
 ```
 npm run preview
 
-Hệ thống sẽ ngay lập tức tự động quét, giả lập khách hàng chạy qua 5 User Stories và trả về kết quả màu xanh (`BUILD SUCCESS`) nếu mọi tính năng vẫn đang hoạt động hoàn hảo!
+Hệ thống sẽ ngay lập tức tự động quét, giả lập khách hàng chạy qua 8 User Stories và trả về kết quả màu xanh (`BUILD SUCCESS`) nếu mọi tính năng vẫn đang hoạt động hoàn hảo!

@@ -15,6 +15,7 @@
         <li class="active"><a href="#dashboard">📊 Dashboard</a></li>
         <li><a href="#campaign">⚙️ Tạo Chiến Dịch</a></li>
         <li><a href="#combo">🎁 Quản lý Combo</a></li>
+        <li><a href="#products-manage">📦 Quản lý SP Sale</a></li>
         <li><a href="/index.html">🛒 Về Cửa Hàng</a></li>
         <li><a href="#" onclick="localStorage.clear(); window.location.href='/index.html';">🔄 Reset Dữ Liệu</a></li>
       </ul>
@@ -86,6 +87,32 @@
           
           <h3 style="margin-top: 30px; margin-bottom: 15px;">Danh sách Combo</h3>
            <div id="combo-list" class="combo-list"></div>
+        </div>
+      </section>
+
+      <section id="products-manage" class="admin-section">
+        <div class="glass form-container" style="max-width: 800px;">
+          <h2>📦 Quản Lý Sản Phẩm Flash Sale</h2>
+          <form id="product-manage-form">
+              <div class="form-group">
+                 <label>Chọn Sản Phẩm</label>
+                 <select id="product-select" required>
+                    <!-- Filled by JS -->
+                 </select>
+              </div>
+              <div class="form-group">
+                 <label>Giá Flash Sale (VNĐ)</label>
+                 <input type="number" id="flash-price" required min="1">
+              </div>
+              <div class="form-group">
+                 <label>Số lượng giới hạn</label>
+                 <input type="number" id="flash-limit" required min="1">
+              </div>
+              <button type="submit" class="btn btn-primary">Thêm vào chiến dịch</button>
+          </form>
+          
+          <h3 style="margin-top: 30px; margin-bottom: 15px;">Sản phẩm trong chiến dịch</h3>
+          <div id="campaign-product-list" class="combo-list"></div>
         </div>
       </section>
     </main>

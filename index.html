@@ -42,8 +42,30 @@
 
     <section class="products-section">
       <h2 class="section-title">⚡ Đang Bán Chạy</h2>
+      <div id="category-filter" class="category-filter" style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+        <!-- Filled by JS -->
+      </div>
       <div id="product-grid" class="product-grid">
         <!-- Products injected by JS -->
+      </div>
+      <div id="empty-category-msg" style="display:none; text-align:center; padding:40px 20px;">
+        <p style="font-size:18px; color:var(--text-secondary);">Rất tiếc, chưa có sản phẩm nào trong danh mục này đang giảm giá</p>
+        <h3 style="margin-top:20px; margin-bottom:15px;">🔥 Sản phẩm bán chạy nhất</h3>
+        <div id="top-selling-grid" class="product-grid"></div>
+      </div>
+    </section>
+
+    <section class="products-section" id="combo-section" style="margin-top:40px; display:none;">
+      <h2 class="section-title">🎁 Combo Siêu Tiết Kiệm</h2>
+      <div id="combo-grid" class="product-grid">
+        <!-- Combo cards injected by JS -->
+      </div>
+    </section>
+
+    <section class="products-section" style="margin-top:40px;">
+      <h2 class="section-title">📋 Lịch Sử Đơn Hàng</h2>
+      <div id="order-history" class="order-history">
+        <!-- Filled by JS -->
       </div>
     </section>
   </main>

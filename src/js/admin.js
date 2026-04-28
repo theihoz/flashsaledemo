@@ -109,6 +109,79 @@ renderDashboard();
 renderProductOptions();
 renderComboList();
 
+// ===================== US6: Quản lý Sản phẩm Flash Sale =====================
+
+const renderProductSelect = () => {
+    const select = document.getElementById('product-select');
+    const products = store.getProducts();
+    select.innerHTML = '<option value="">-- Chọn sản phẩm --</option>' + 
+        products.map(p => 
+            `<option value="${p.id}" data-price="${p.originalPrice}">${p.name} (Giá gốc: ${formatCurrency(p.originalPrice)})</option>`
+        ).join('');
+    
+    // Auto-fill flash price when product selected
+    select.addEventListener('change', () => {
+        const opt = select.selectedOptions[0];
+        if (opt && opt.dataset.price) {
+            document.getElementById('flash-price').value = Math.round(opt.dataset.price * 0.8); // Gợi ý giảm 20%
+        }
+    });
+};
+
+const renderCampaignProducts = () => {
+    const list = document.getElementById('campaign-product-list');
+    const campaignProducts = store.getCampaignProducts();
+    const products = store.getProducts();
+    
+    if (campaignProducts.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-secondary)">Chưa có sản phẩm nào trong chiến dịch.</p>';
+        return;
+    }
+    
+    list.innerHTML = campaignProducts.map(cp => {
+        const product = products.find(p => p.id === parseInt(cp.productId) || p.name === cp.productId);
+        const name = product ? product.name : cp.productId;
+        return `<div class="combo-item" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <strong>${name}</strong> — Giá Sale: ${formatCurrency(cp.flashSalePrice)} | SL: ${cp.limitQuantity}
+            </div>
+            <button class="btn btn-primary" style="background:#ef4444; padding: 6px 12px; font-size:12px;" 
+                onclick="removeFlashProduct('${cp.productId}')">🗑 Xóa</button>
+        </div>`;
+    }).join('');
+};
+
+document.getElementById('product-manage-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const select = document.getElementById('product-select');
+    const productId = select.value;
+    const flashPrice = parseInt(document.getElementById('flash-price').value);
+    const limitQty = parseInt(document.getElementById('flash-limit').value);
+    
+    if (!productId) {
+        showToast('Vui lòng chọn sản phẩm', false);
+        return;
+    }
+    
+    const result = store.addFlashSaleProduct(productId, flashPrice, limitQty);
+    showToast(result.message, result.success);
+    if (result.success) {
+        renderCampaignProducts();
+        e.target.reset();
+    }
+});
+
+window.removeFlashProduct = (productId) => {
+    const result = store.removeFlashSaleProduct(productId);
+    showToast(result.message, result.success);
+    if (result.success) {
+        renderCampaignProducts();
+    }
+};
+
+renderProductSelect();
+renderCampaignProducts();
+
 // Prefill campaign form with active campaign if any for UX
 const currentCampaign = store.getCampaign();
 if (currentCampaign) {

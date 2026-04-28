@@ -420,4 +420,126 @@ sequenceDiagram
  │                                                          │
  │ 🚫 Lỗi kẹt kho: Thằng "Nước hoa Chanel" rỗng rồi sếp ơi! │
  ╰──────────────────────────────────────────────────────────╯
+
+---
+
+## 🟢 US6: Thêm mới và Xóa Sản phẩm khỏi Chiến dịch Flash Sale
+
+### 1. Kiến trúc BCE
+> **Giải thích:** Quản lý thao tác danh sách sản phẩm, Controller gửi yêu cầu tới Lõi quản lý sản phẩm để cập nhật danh mục khuyến mãi.
+```text
+  [ BOUNDARY / GIAO DIỆN ]                ( CONTROL / XỬ LÝ )                 { ENTITY / LÕI NGHIỆP VỤ }
+  
+  ╔════════════════════╗               ┌────────────────────┐               ⟪──────────────────────⟫
+  ║ GIAO DIỆN QUẢN LÝ  ║ = Thêm/Xóa ==> │  BỘ ĐIỀU PHỐI SP   │ === Cập nhật =>│ DANH SÁCH SẢN PHẨM   │
+  ║ (AdminBoundary)    ║               │ (ProductManager)   │               │ (FlashSaleProductList)│
+  ╚════════════════════╝ <== Kết quả == └────────────────────┘ <== Xác nhận =⟪──────────────────────⟫
+```
+
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
+> **Kỹ thuật:** Luồng xử lý thêm/xóa sản phẩm vào danh mục sale hiện hành.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant Boundary as Giao diện Admin - AdminBoundary (Layer: Boundary)
+    participant Control as Bộ điều phối - ProductManagerController (Layer: Control)
+    participant Entity as Lõi danh sách - FlashSaleProductList (Layer: Entity)
+
+    Admin->>Boundary: addFlashSaleProduct(id, price, qty)
+    Boundary->>Control: addProductToCampaign(id, price, qty)
+    Control->>Entity: addProduct(id, price, qty)
+    
+        Note right of Entity: Kiểm tra trùng lặp
+        alt Sản phẩm đã tồn tại
+            Entity-->>Control: throw IllegalArgumentException
+            Control-->>Boundary: error: Sản phẩm đã tồn tại
+            Boundary-->>Admin: Hiển thị thông báo lỗi
+        else Sản phẩm mới
+            Entity-->>Control: success
+            Control-->>Boundary: success
+            Boundary-->>Admin: Cập nhật bảng sản phẩm
+        end
+```
+
+---
+
+## 🟢 US7: Phân loại sản phẩm theo danh mục
+
+### 1. Kiến trúc BCE
+> **Giải thích:** Khách hàng chọn bộ lọc, Control truy vấn danh mục từ Entity và trả về danh sách đã được lọc.
+```text
+  [ BOUNDARY / GIAO DIỆN ]                ( CONTROL / XỬ LÝ )                 { ENTITY / LÕI NGHIỆP VỤ }
+  
+  ╔════════════════════╗               ┌────────────────────┐               ⟪──────────────────────⟫
+  ║ TRANG CHỦ / BỘ LỌC ║ = Chọn DM ===> │ BỘ LỌC DANH MỤC    │ === Truy vấn =>│ SẢN PHẨM & DANH MỤC  │
+  ║ (CustomerBoundary) ║               │  (ProductCatalog)  │               │  (FlashSaleProduct)  │
+  ╚════════════════════╝ <== List SP == └────────────────────┘ <== Dữ liệu ==⟪──────────────────────⟫
+```
+
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
+> **Kỹ thuật:** Luồng truy vấn sản phẩm theo tags danh mục và cơ chế fallback gợi ý.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Customer
+    participant Boundary as Giao diện Khách - CustomerBoundary (Layer: Boundary)
+    participant Control as Trình quản lý SP - ProductCatalog (Layer: Control)
+    participant Entity as Lõi sản phẩm - FlashSaleProduct (Layer: Entity)
+
+    Customer->>Boundary: filterByCategory(categoryName)
+    Boundary->>Control: getProductsByCategory(categoryName)
+    Control->>Entity: findByCategory(categoryName)
+    Entity-->>Control: List<Products>
+    
+    alt Danh sách rỗng
+        Control->>Entity: getTopSelling()
+        Entity-->>Control: List<TopSelling>
+        Control-->>Boundary: suggest(TopSelling)
+    else Có sản phẩm
+        Control-->>Boundary: renderedProducts
+    end
+    Boundary-->>Customer: Hiển thị danh sách hoặc gợi ý
+```
+
+---
+
+## 🟢 US8: Lịch sử đơn hàng chi tiết
+
+### 1. Kiến trúc BCE
+> **Giải thích:** Khách hàng xem lại các giao dịch đã thực hiện trong quá khứ.
+```text
+  [ BOUNDARY / GIAO DIỆN ]                ( CONTROL / XỬ LÝ )                 { ENTITY / LÕI NGHIỆP VỤ }
+  
+  ╔════════════════════╗               ┌────────────────────┐               ⟪──────────────────────⟫
+  ║ MỤC LỊCH SỬ MUA    ║ = Yêu cầu ===> │ BỘ QUẢN LÝ ĐƠN     │ === Truy vấn =>│ KHO ĐƠN HÀNG ĐÃ LƯU  │
+  ║ (CustomerBoundary) ║               │ (OrderManager)     │               │    (OrderHistory)    │
+  ╚════════════════════╝ <== Chi tiết = └────────────────────┘ <== Dữ liệu ==⟪──────────────────────⟫
+```
+
+### 2. Sơ đồ Tuần Tự (Sequence Diagram)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Customer
+    participant Boundary as Giao diện Khách - CustomerBoundary (Layer: Boundary)
+    participant Control as Quản lý đơn - OrderManager (Layer: Control)
+    participant Entity as Lõi dữ liệu - OrderHistory (Layer: Entity)
+
+    Customer->>Boundary: getOrderHistory()
+    Boundary->>Control: getOrdersByCustomer()
+    Control->>Entity: fetchOrders()
+    Entity-->>Control: List<Orders>
+    
+    alt Không có đơn hàng
+        Control-->>Boundary: empty: suggest 'Mua ngay'
+        Boundary-->>Customer: Hiển thị nút CTA
+    else Có đơn hàng
+        Control-->>Boundary: List<OrderDetails>
+        Boundary-->>Customer: Render bảng lịch sử & Tiền tiết kiệm
+    end
+```
+
 ```

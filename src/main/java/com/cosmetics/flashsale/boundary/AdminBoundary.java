@@ -3,7 +3,9 @@ package com.cosmetics.flashsale.boundary;
 import com.cosmetics.flashsale.control.CampaignManager;
 import com.cosmetics.flashsale.control.ComboManager;
 import com.cosmetics.flashsale.control.DashboardController;
+import com.cosmetics.flashsale.control.ProductManagerController;
 import com.cosmetics.flashsale.entity.FlashSaleInventory;
+import com.cosmetics.flashsale.entity.FlashSaleProductList;
 import com.cosmetics.flashsale.entity.SaleAnalytics;
 
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ public class AdminBoundary {
     private CampaignManager campaignManager = new CampaignManager();
     private DashboardController dashboardController = new DashboardController();
     private ComboManager comboManager = new ComboManager();
+    private ProductManagerController productManager = new ProductManagerController();
 
     /**
      * Lên lịch cho chiến dịch mới.
@@ -45,5 +48,26 @@ public class AdminBoundary {
      */
     public void createCombo(String name, List<FlashSaleInventory> products, double originalPrice, double discount) {
         comboManager.createCombo(name, products, originalPrice, discount);
+    }
+
+    /**
+     * US6: Thêm sản phẩm vào chiến dịch Flash Sale.
+     */
+    public void addFlashSaleProduct(String productId, double flashSalePrice, int limitQuantity) {
+        productManager.addProductToCampaign(productId, flashSalePrice, limitQuantity);
+    }
+
+    /**
+     * US6: Xóa sản phẩm khỏi chiến dịch Flash Sale.
+     */
+    public void removeFlashSaleProduct(String productId) {
+        productManager.removeProductFromCampaign(productId);
+    }
+
+    /**
+     * US6: Lấy danh sách sản phẩm trong chiến dịch.
+     */
+    public List<FlashSaleProductList.FlashSaleProductEntry> getCampaignProducts() {
+        return productManager.getCampaignProducts();
     }
 }
